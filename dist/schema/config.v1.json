@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mercure.config.v1",
+  "title": "Mercure Hub Configuration file Schema",
+  "description": "Schema for the Mercure Hub Configuration file",
+  "type": "object",
+  "properties": {
+    "logLevel": {
+      "type": "string",
+      "description": "The minimum log level to use for runtime logging.",
+      "enum": [
+        "debug",
+        "info",
+        "warn",
+        "error"
+      ],
+      "default": "info"
+    },
+    "logFormat": {
+      "type": "string",
+      "description": "The format to use for runtime logging. If auto, it will use JSON in non-interactive environments automatically.",
+      "enum": [
+        "json",
+        "console",
+        "auto"
+      ],
+      "default": "auto"
+    },
+    "logColors": {
+      "description": "Enable colored log output. If auto, it will use colors in interactive",
+      "default": "auto",
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "const": "auto"
+        }
+      ]
+    },
+    "transportUri": {
+      "type": "string",
+      "format": "uri",
+      "description": "The connection DSN to use for the event transport. The URL scheme will be used to identify the transport adapter to use.",
+      "default": "memory://",
+      "examples": [
+        "memory://",
+        "redis://localhost:6379",
+        "nats://localhost:4222"
+      ]
+    },
+    "heartbeatInterval": {
+      "type": "integer",
+      "description": "The interval between heartbeat messages, in milliseconds.",
+      "default": 30000,
+      "minimum": 100,
+      "multipleOf": 1
+    },
+    "metrics": {
+      "type": "boolean",
+        "description": "Enable the Prometheus metrics collector.",
+      "default": false
+    },
+    "metricsEndpoint": {
+      "type": "string",
+      "description": "Path to publish the Prometheus metrics endpoint at.",
+      "default": "/metrics",
+      "examples": [
+        "/metrics",
+        "/metrics/prometheus"
+      ]
+    },
+    "apiEnabled": {
+      "type": "boolean",
+      "description": "Enable the subscriptions API.",
+      "default": false
+    },
+    "queryParamAuthorization": {
+      "type": "boolean",
+      "description": "Enable subscribers to authenticate using a query parameter. This method is not recommended due to its security deficiencies.",
+      "default": false
+    },
+    "anonymousAccess": {
+      "type": "boolean",
+      "description": "Enable subscribers without a valid token to connect to the server.",
+      "default": false
+    },
+    "cookieName": {
+      "type": "string",
+      "description": "The name of the cookie to use for authorization.",
+      "default": "mercureAuthorization",
+      "examples": [
+        "myCustomCookieName",
+        "auth"
+      ]
+    },
+    "allowedOrigins": {
+      "type": "array",
+      "description": "The list of origins allowed to connect to the server. The wildcard '*' can be used to allow all origins.",
+      "uniqueItems": true,
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "anyOf": [
+          {
+            "const": "*"
+          },
+          {
+            "format": "uri-reference"
+          },
+          {
+            "format": "uri-template"
+          }
+        ]
+      },
+      "default": [
+        "*"
+      ],
+      "examples": [
+        [
+          "*"
+        ],
+        [
+          "http://example.com",
+          "https://example.com"
+        ],
+        [
+          "http://example.com",
+          "https://*.example.com",
+          "https://example.com:8080/{path}"
+        ]
+      ]
+    },
+    "jwk": {
+      "type": "string",
+      "description": "Encoded JWK to use for verifying both publisher and subscriber JWTs."
+    },
+    "subscriberJwk": {
+      "type": "string",
+      "description": "Encoded JWK to use for verifying subscriber JWTs."
+    },
+    "publisherJwk": {
+      "type": "string",
+      "description": "Encoded JWK to use for verifying publisher JWTs."
+    },
+    "jwksUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the JSON Web Key Set (JWK Set) to use for verifying both publisher JWTs and subscriber JWTs."
+    },
+    "subscriberJwksUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the JSON Web Key Set (JWK Set) to use for validating publisher JWTs."
+    },
+    "publisherJwksUrl": {
+      "type": "string",
+      "format": "uri"
+    }
+  },
+  "if": {
+    "properties": {
+      "jwk": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "jwk"
+    ]
+  },
+  "then": {
+    "not": {
+      "anyOf": [
+        {
+          "required": [
+            "subscriberJwk"
+          ]
+        },
+        {
+          "required": [
+            "publisherJwk"
+          ]
+        },
+        {
+          "required": [
+            "jwks_url"
+          ]
+        },
+        {
+          "required": [
+            "subscriberJwksUrl"
+          ]
+        },
+        {
+          "required": [
+            "publisherJwksUrl"
+          ]
+        }
+      ]
+    }
+  },
+  "else": {
+    "if": {
+      "properties": {
+        "subscriberJwk": {
+          "type": "string"
+        },
+        "publisherJwk": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "subscriberJwk",
+        "publisherJwk"
+      ]
+    },
+    "then": {
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "jwk"
+            ]
+          },
+          {
+            "required": [
+              "jwks_url"
+            ]
+          },
+          {
+            "required": [
+              "subscriberJwksUrl"
+            ]
+          },
+          {
+            "required": [
+              "publisherJwksUrl"
+            ]
+          }
+        ]
+      }
+    },
+    "else": {
+      "if": {
+        "properties": {
+          "jwks_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "jwks_url"
+        ]
+      },
+      "then": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "jwk"
+              ]
+            },
+            {
+              "required": [
+                "subscriberJwk"
+              ]
+            },
+            {
+              "required": [
+                "publisherJwk"
+              ]
+            },
+            {
+              "required": [
+                "subscriberJwksUrl"
+              ]
+            },
+            {
+              "required": [
+                "publisherJwksUrl"
+              ]
+            }
+          ]
+        }
+      },
+      "else": {
+        "if": {
+          "properties": {
+            "subscriberJwksUrl": {
+              "type": "string"
+            },
+            "publisherJwksUrl": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "subscriberJwksUrl",
+            "publisherJwksUrl"
+          ]
+        },
+        "then": {
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "jwk"
+                ]
+              },
+              {
+                "required": [
+                  "subscriberJwk"
+                ]
+              },
+              {
+                "required": [
+                  "publisherJwk"
+                ]
+              },
+              {
+                "required": [
+                  "jwksUrl"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

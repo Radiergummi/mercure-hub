@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+DIR=$(cd -P -- "$(dirname -- "$(command -v -- "${0}")")" && pwd -P)
+
+# This script is a helper to run the Mercure Hub.
+deno run \
+  --env \
+  --allow-read \
+  --allow-net \
+  --allow-env \
+  "${DIR}/../mod.ts" "$@"

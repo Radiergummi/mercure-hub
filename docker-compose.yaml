@@ -1,0 +1,71 @@
+name: mercure-hub
+services:
+  hub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MERCURE_LOG_LEVEL: "${MERCURE_LOG_LEVEL:-debug}"
+      MERCURE_METRICS: "${MERCURE_METRICS:-true}"
+      MERCURE_WEB_UI: "${MERCURE_WEB_UI:-true}"
+      MERCURE_SUBSCRIPTIONS_API: "${MERCURE_SUBSCRIPTIONS_API:-true}"
+      MERCURE_LISTEN_ADDRESS: "${MERCURE_LISTEN_ADDRESS:-0.0.0.0:8000}"
+    env_file:
+      - ./.env
+    volumes:
+      - .:/app
+    ports:
+      - host_ip: "127.0.0.1"
+        protocol: tcp
+        published: 8000
+        target: 8000
+        app_protocol: http
+        name: "Mercure Hub HTTP"
+    expose:
+      - "8000"
+
+  redis:
+    image: redis:latest
+    expose:
+      - "6379"
+    ports:
+      - host_ip: "127.0.0.1"
+        protocol: tcp
+        published: 6379
+        target: 6379
+        name: "Redis TCP"
+
+  redis-exporter:
+    image: "oliver006/redis_exporter:latest"
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+    expose:
+      - 9121
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - type: volume
+        source: prometheus
+        target: /prometheus
+      - type: bind
+        source: ./prometheus.yaml
+        target: /etc/prometheus/prometheus.yml
+        read_only: true
+        consistency: cached
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--log.level=warn"
+    expose:
+      - 9090
+    ports:
+      - host_ip: "127.0.0.1"
+        protocol: tcp
+        published: 9090
+        target: 9090
+        app_protocol: http
+        name: "Prometheus HTTP"
+
+volumes:
+  prometheus:
+    name: mercure-prometheus

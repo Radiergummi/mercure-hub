@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 15s
+  external_labels:
+    monitor: monitor
+
+scrape_configs:
+  - job_name: prometheus
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "prometheus:9090" ]
+
+  - job_name: redis
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "redis-exporter:9121" ]
+
+  - job_name: mercure_hub
+    static_configs:
+      - targets: [ "hub:8000" ]
+

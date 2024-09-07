@@ -1,0 +1,9 @@
+/.idea/
+/dist/
+/tests/
+/vendor/
+**/*_test.ts
+docker-compose.yaml
+README.md
+Dockerfile
+.gitignore

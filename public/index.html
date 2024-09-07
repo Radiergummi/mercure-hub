@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mercure Hub</title>
+    <link href="assets/style.css" rel="stylesheet">
+</head>
+<body>
+<article>
+    <header style="display: flex; justify-content: space-between; align-items: center">
+        <h1>Mercure Hub</h1>
+
+        <div>
+            <button data-subscribe-button>Subscribe</button>
+            <button data-unsubscribe-button disabled>Unsubscribe</button>
+        </div>
+    </header>
+
+    <section style="display: flex; margin-bottom: 2rem">
+        <label style="flex-grow: 1; margin-right: 2rem">
+            <input aria-label="JSON Web Token"
+                   type="password"
+                   placeholder="JSON Web Token"
+                   style="width: 100%; padding: 0.125rem 0.5rem; font-size: 1rem"
+                   data-jwt-input/>
+
+            <span style="display: block; font-size: 0.875rem; margin-top: 0.25rem; padding: 0 0.5rem; opacity: 0.6">
+                You may use a JWT to authenticate the connection. To issue a test JWT, run the following command on the
+                server command line: <code style="font-size: 0.8rem">mercure issue jwt --jwk ./your.key</code>
+            </span>
+        </label>
+
+        <div>
+            <button data-use-jwt-button>Use</button>
+        </div>
+    </section>
+
+    <section>
+        <header>
+            <h2>Step 1: Obtain Authorization</h2>
+
+            <p style="margin-top: 0.25rem; opacity: 0.6; font-size: 0.875rem">
+                Use the form below to obtain a new token. The token will be used to authenticate the connection
+                to the Mercure Hub with the topic selectors you choose for subscription and publication.
+            </p>
+        </header>
+
+        <token-form></token-form>
+    </section>
+
+    <section>
+        <header>
+            <h2>Step 2: Subscribe to topics</h2>
+        </header>
+
+        <topic-input placeholder="Subscribe to…"></topic-input>
+    </section>
+
+    <section>
+        <header>
+            <h2>Step 3: Wait for updates</h2>
+        </header>
+
+        <pre data-log>
+        </pre>
+    </section>
+</article>
+
+<script type="module" src="/assets/main.js"></script>
+</body>
+</html>
